@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Poop;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,5 +16,21 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('hello');
+    return view('hello', [
+        'count' => Cache::remember(
+            'poops_count',
+            now()->addMinutes(10), 
+            fn () => Poop::count()
+        ),
+    ]);
+});
+
+// X // model - means data in a database | means what/how the poop is
+// controller - organizes visual content and database data | getting the data and giving it to the view
+// view - means the visual representation of content given to the user (browser) | displaying the data regarding poops
+
+Route::post('/', function (\Illuminate\Http\Request $request) {
+    Poop::create();
+    Cache::increment('poops_count');
+    return redirect('/');
 });
